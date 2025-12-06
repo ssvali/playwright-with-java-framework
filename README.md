@@ -65,26 +65,28 @@ mvn clean test -Dheadless=false
 Run against QA environment:
 mvn clean verify -Denv=QA
 
-Override URL, username, password:
-mvn clean verify -Dbase.url=https://staging.app.com -Dusername=admin -Dpassword=secret
+    Override URL, username, password:
+    mvn clean verify -Dbase.url=https://staging.app.com -Dusername=admin -Dpassword=secret
 
 Full example:
-mvn clean test \
--Denv=QA \
--Dbase.url=https://staging.app.com \
--Dusername=qauser \
--Dpassword=qapass \
--Dheadless=false
+
+    mvn clean test \
+    -Denv=QA \
+    -Dbase.url=https://staging.app.com \
+    -Dusername=qauser \
+    -Dpassword=qapass \
+    -Dheadless=false
 
 ### 🧪 Running Tests
 Standard execution:
-mvn clean test
+
+    mvn clean test
 
 Run with verification:
-mvn clean verify
 
-Enable/disable headless:
-mvn clean test -Dheadless=true
+    mvn clean verify
+    Enable/disable headless:
+    mvn clean test -Dheadless=true
 
 ### 🧵 Parallel Execution
 
