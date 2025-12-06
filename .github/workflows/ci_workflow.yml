@@ -1,36 +1,51 @@
-# yaml
-name: Java CI
+  yaml
+  name: Java CI
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  on:
+    push:
+      branches: [ main ]
+    pull_request:
+      branches: [ main ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      ASPECTJ_VERSION: 1.9.21
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      env:
+        ASPECTJ_VERSION: 1.9.21
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-      - name: Setup JDK 17 and cache Maven
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: 'maven'
+        - name: Setup JDK 17 and cache Maven
+          uses: actions/setup-java@v4
+          with:
+            distribution: temurin
+            java-version: '17'
+            cache: 'maven'
 
-      - name: Build & Install Dependencies
-        run: mvn -B install -D skipTests --no-transfer-progress
+        - name: Setup Maven
+          uses: apache/setup-maven@v3
+          with:
+            maven-version: '3.9.6'
+            cache: 'local'
 
-      - name: Install Playwright Browsers
-        run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps"
+        - name: Install Playwright system dependencies and browsers
+          uses: microsoft/playwright-action@v1
+          with:
+            browsers: "chromium,firefox,webkit"
 
-      - name: Ensure AspectJ is downloaded
-        run: mvn -B dependency:get -Dartifact=org.aspectj:aspectjweaver:${ASPECTJ_VERSION}
+        - name: Build & Install Dependencies
+          run: mvn -B install -D skipTests --no-transfer-progress
 
-      - name: Build and run tests
-        run: mvn -B -U -DskipTests=false clean verify -Dheadless=true -Denv=DEV
+        - name: Install Playwright Browsers
+          run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps"
+
+        - name: Ensure AspectJ is downloaded
+          run: mvn -B dependency:get -Dartifact=org.aspectj:aspectjweaver:${ASPECTJ_VERSION}
+
+        - name: Set MAVEN_OPTS to use AspectJ javaagent
+          run: |
+            echo "MAVEN_OPTS=-javaagent:$HOME/.m2/repository/org/aspectj/aspectjweaver/${ASPECTJ_VERSION}/aspectjweaver-${ASPECTJ_VERSION}.jar" >> $GITHUB_ENV
+
+        - name: Build and run tests
+          run: mvn -B -U -DskipTests=false clean verify -Dheadless=true -Denv=DEV
