@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 class PlaywrightSetupTest {
-    private final String env = System.getProperty("env", "dev");
+    private final String env = System.getProperty("env", "dev").toUpperCase();
     private static final String headless = System.getProperty("headless", "true");
     protected BrowserContext browserContext;
     protected Page page;
