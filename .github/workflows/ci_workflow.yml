@@ -1,0 +1,30 @@
+# yaml
+name: Java CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ASPECTJ_VERSION: 1.9.21
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17 and cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Ensure AspectJ is downloaded
+        run: mvn -B dependency:get -Dartifact=org.aspectj:aspectjweaver:${ASPECTJ_VERSION}
+
+      - name: Build and run tests
+        run: mvn -B -U -DskipTests=false clean verify
