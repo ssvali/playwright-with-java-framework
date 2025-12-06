@@ -22,22 +22,16 @@
             java-version: '17'
             cache: 'maven'
 
-        - name: Setup Maven
-          uses: apache/setup-maven@v3
-          with:
-            maven-version: '3.9.6'
-            cache: 'local'
-
-        - name: Install Playwright system dependencies and browsers
-          uses: microsoft/playwright-action@v1
-          with:
-            browsers: "chromium,firefox,webkit"
+        - name: Install system packages and Maven
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y maven libnss3 libatk1.0-0 libatk-bridge2.0-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 libxss1 fonts-liberation libgtk-3-0
 
         - name: Build & Install Dependencies
-          run: mvn -B install -D skipTests --no-transfer-progress
+          run: mvn -B install -DskipTests --no-transfer-progress
 
         - name: Install Playwright Browsers
-          run: mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps"
+          run: mvn exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps"
 
         - name: Ensure AspectJ is downloaded
           run: mvn -B dependency:get -Dartifact=org.aspectj:aspectjweaver:${ASPECTJ_VERSION}
