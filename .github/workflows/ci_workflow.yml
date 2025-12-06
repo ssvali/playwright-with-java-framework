@@ -1,44 +1,69 @@
-  name: Java CI
+name: Java CI
 
-  on:
-    push:
-      branches: [ main ]
-    pull_request:
-      branches: [ main ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      env:
-        ASPECTJ_VERSION: 1.9.21
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ASPECTJ_VERSION: 1.9.21
 
-        - name: Setup JDK 17 and cache Maven
-          uses: actions/setup-java@v4
-          with:
-            distribution: temurin
-            java-version: '17'
-            cache: 'maven'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Install system packages and Maven
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y maven libnss3 libatk1.0-0 libatk-bridge2.0-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 libxss1 fonts-liberation libgtk-3-0
+      - name: Setup JDK 17 and Cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
 
-        - name: Build & Install Dependencies
-          run: mvn -B install -DskipTests --no-transfer-progress
+      - name: Install system packages (Playwright deps + Maven)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libgbm1 \
+            libasound2 libpangocairo-1.0-0 libxss1 fonts-liberation libgtk-3-0
 
-        - name: Install Playwright Browsers
-          run: mvn exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps"
+      - name: Build & install dependencies
+        run: mvn -B install -DskipTests --no-transfer-progress
 
-        - name: Ensure AspectJ is downloaded
-          run: mvn -B dependency:get -Dartifact=org.aspectj:aspectjweaver:${ASPECTJ_VERSION}
+      # === Playwright Installation Step ===
+      - name: Install Playwright Browsers
+        run: mvn exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps"
 
-        - name: Set MAVEN_OPTS to use AspectJ javaagent
-          run: |
-            echo "MAVEN_OPTS=-javaagent:$HOME/.m2/repository/org/aspectj/aspectjweaver/${ASPECTJ_VERSION}/aspectjweaver-${ASPECTJ_VERSION}.jar" >> $GITHUB_ENV
+      - name: Ensure AspectJ is downloaded
+        run: mvn -B dependency:get -Dartifact=org.aspectj:aspectjweaver:${ASPECTJ_VERSION}
 
-        - name: Build and run tests
-          run: mvn -B -U -DskipTests=false clean verify -Dheadless=true -Denv=DEV
+      - name: Set MAVEN_OPTS to use AspectJ javaagent
+        run: |
+          echo "MAVEN_OPTS=-javaagent:$HOME/.m2/repository/org/aspectj/aspectjweaver/${ASPECTJ_VERSION}/aspectjweaver-${ASPECTJ_VERSION}.jar" >> $GITHUB_ENV
+
+      # === Playwright Test Execution ===
+      - name: Run Tests
+        run: mvn -B -U clean verify -DskipTests=false -Dheadless=true -Denv=DEV
+
+      # === Upload Playwright Report (if generated) ===
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: target/playwright-report/
+          if-no-files-found: ignore
+
+      # === Upload Videos/Screenshots (optional) ===
+      - name: Upload Playwright Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            target/test-classes/**/*.mp4
+            target/test-classes/**/*.png
+          if-no-files-found: ignore
