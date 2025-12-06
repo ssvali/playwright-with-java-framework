@@ -11,7 +11,7 @@ import java.util.Properties;
 
 class PlaywrightSetupTest {
     private final String env = System.getProperty("env", "dev");
-    private static final String headless = System.getProperty("headless", "false");
+    private static final String headless = System.getProperty("headless", "true");
     protected BrowserContext browserContext;
     protected Page page;
 
