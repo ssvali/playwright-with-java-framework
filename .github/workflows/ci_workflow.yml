@@ -59,5 +59,12 @@ jobs:
           npx playwright install-deps
 
       # Step 6: Run Maven to execute Playwright tests
-      - name: Run Playwright Tests
-        run: mvn verify
+      - name: Run Playwright Tests (headed mode for debugging)
+        run: mvn verify -Dheadless=false
+
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-artifacts
+          path: target/
