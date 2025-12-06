@@ -18,7 +18,6 @@ class LoginTest extends PlaywrightSetupTest {
         page.navigate(getProperties("url"));
         navBarObject = new NavBarObject(page);
         waitUtil = new WaitUtil(page);
-        waitUtil.waitForPageLoad();
     }
 
     @Test
