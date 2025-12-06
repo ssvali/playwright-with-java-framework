@@ -37,3 +37,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+.allure
+.mvn
+allure-results
+reports
