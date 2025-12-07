@@ -60,7 +60,7 @@ jobs:
 
       # Step 6: Run Maven to execute Playwright tests
       - name: Run Playwright Tests (headed mode for debugging)
-        run: mvn verify -Dheadless=false
+        run: mvn verify -Dheadless=ture
 
       - name: Upload debug artifacts
         if: always()
