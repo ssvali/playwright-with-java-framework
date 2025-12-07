@@ -57,6 +57,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libpango-1.0-0 libcairo2 libgdk-pixbuf2.0-0
           npx playwright install-deps
+          xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24"
 
       # Step 6: Run Maven to execute Playwright tests
       - name: Run Playwright Tests (headed mode for debugging)
