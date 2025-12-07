@@ -30,4 +30,4 @@ jobs:
              -Dexec.args="install --with-deps"
 
       - name: Run tests
-        run: mvn test
+        run: mvn verify
